@@ -6,13 +6,13 @@ var router = express.Router();
  */
 
 /**
- * route: /reboot/
+ * route: /complete/
  * method: GET
  * description: to kill server (used in pipeline should not exist in production)
  */
 
-router.get('/reboot/', function (req, res, next) {
-  process.exit(1);
+router.get('/complete/', function (req, res, next) {
+  process.exit(0);
 });
 
 module.exports = router;
