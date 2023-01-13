@@ -1,0 +1,180 @@
+extends layout
+
+block content
+  h1= title
+  //- debugging
+  //- p title:  #{title ? true : false}
+  //- p data: #{data ? JSON.stringify(data) : false}
+  //- p edit: #{edit ? true : false}
+  //- p editPost: #{editPost ? true : false}
+  //- p showViewTable: #{showViewTable ? true : false}
+  //- p showViewSingle: #{showViewSingle ? true : false}
+  //- p showAddTable: #{showAddTable ? true : false}
+  if showAddTable
+    p
+    .modal-dialog
+        .modal-content
+          // Modal Header
+          .modal-header
+            button.close(type="button", data-dismiss="modal", onclick='window.location = location.href.slice(0, location.href.lastIndexOf("add/")) + "view/all/"')
+              span(aria-hidden="true") ×
+              span.sr-only Close
+            h4#myModalLabel.modal-title
+              | Add User
+          // Modal Body
+          .modal-body
+            form(role='form' method='POST' action='/api/topicsmanager/users/add/')
+              if data
+                div.form-group
+                if data.errorMsg
+                  label(for='error') Error! : #{JSON.stringify(data.errorMsg)}
+              div.form-group
+                label(for='userName') User Name:
+                input#name.form-control(type='text', placeholder='username' name='userName')
+              div.form-group
+                label(for='password') Password:
+                input#name.form-control(type='password', name='password')
+              div.form-group
+                label(for='emailAddress') EmailAddress:
+                input#name.form-control(type='text', placeholder='user@email.com' name='emailAddress')
+              div.form-group
+                label(for='userLevel') User Level:
+                input#name.form-control(type='text', placeholder='0' name='userLevel')
+              button.btn.btn-primary(type="submit", name="submit") Submit
+              button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = location.href.slice(0, location.href.lastIndexOf("add/")) + "view/all/"')
+                | Close
+          // Modal Footer
+          .modal-footer
+            h4 footer
+    // footer
+    p.foot.text-xs-center(align='center') Topics Manager - 2023
+  else if edit
+    p
+      .modal-dialog
+          .modal-content
+            // Modal Header
+            .modal-header
+              h4#myModalLabel.modal-title
+                | Edit User
+            // Modal Body
+            .modal-body
+              form(role='form' method='POST' action='')
+                if data[1]
+                  div.form-group
+                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                div.form-group
+                  label(for='topicName') User Name:
+                  input#name.form-control(type='text', value=data[0].userName name='userName')
+                div.form-group
+                  label(for='topicUrl') Password:
+                  input#name.form-control(type='text', value=data[0].password name='password')
+                div.form-group
+                  label(for='createdBy') Email Address:
+                  input#name.form-control(type='text', value=data[0].emailAddress name='emailAddress')
+                div.form-group
+                  label(for='episode') Refresh Token:
+                  input#name.form-control(type='text', value=data[0].refreshToken name='refreshToken')
+                div.form-group
+                  label(for='episode') User Level:
+                  input#name.form-control(type='text', value=data[0].userLevel name='userLevel')
+                button.btn.btn-primary(type="submit", name="submit") Submit
+                button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/users/view/all/"')
+                  | Close
+            // Modal Footer
+            .modal-footer
+              h4 footer
+      // footer
+      p.foot.text-xs-cente(align='center') Topics Manager - 2023
+  else if editPost
+    p
+      .modal-dialog
+          .modal-content
+            // Modal Header
+            .modal-header
+              h4#myModalLabel.modal-title
+                | Edit User
+            // Modal Body
+            .modal-body
+              form(role='form' method='POST' action='')
+                if data[1]
+                  div.form-group
+                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                div.form-group
+                  label(for='topicName') User Name:
+                  input#name.form-control(type='text', value=data[0].userName name='userName')
+                div.form-group
+                  label(for='topicUrl') Password:
+                  input#name.form-control(type='text', value=data[0].password name='password')
+                div.form-group
+                  label(for='createdBy') Email Address:
+                  input#name.form-control(type='text', value=data[0].emailAddress name='emailAddress')
+                div.form-group
+                  label(for='episode') Refresh Token:
+                  input#name.form-control(type='text', value=data[0].refreshToken name='refreshToken')
+                div.form-group
+                  label(for='episode') User Level:
+                  input#name.form-control(type='text', value=data[0].userLevel name='userLevel')
+                button.btn.btn-primary(type="submit", name="submit") Submit
+                button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/users/view/all/"')
+                  | Close
+            // Modal Footer
+            .modal-footer
+              h4 footer
+      // footer
+      p.foot.text-xs-center(align='center') Topics Manager - 2023
+  else if showViewTable
+    .table.table-hover.table-striped.table-sm.table-responsive
+      table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
+        tr
+          th(scope='col') [#]
+          th(scope='col') userName
+          th(scope='col') password 
+          th(scope='col') emailAddress 
+          th(scope='col') refreshToken 
+          th(scope='col') userLevel
+          th(scope='col') createdAt
+          th(scope='col') updatedAt
+        each user in data 
+          tr 
+            td(value=user.userId id='userId')
+              a(href=`/api/topicsmanager/users/view/${user.userId}/`) #{user.userId}
+            td(value=user.userName id='userName') #{user.userName}
+            td(value=user.password id='password') #{user.password}
+            td(value=user.emailAddress id='emailAddress') #{user.emailAddress}
+            td(value=user.refreshToken id='refreshToken') #{user.refreshToken}
+            td(value=user.userLevel id='userLevel') #{user.userLevel}
+            td(value=user.createdBy id='createdAt') #{user.createdAt}
+            td(value=user.createdBy id='updatedAt') #{user.updatedAt}
+  else if showViewSingle
+    .table.table-hover.table-striped.table-sm.table-responsive
+      table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
+        tr
+          th(scope='col') [#]
+          th(scope='col') userName
+          th(scope='col') password 
+          th(scope='col') emailAddress 
+          th(scope='col') refreshToken 
+          th(scope='col') userLevel
+          th(scope='col') createdAt
+          th(scope='col') updatedAt
+          th(scope='col')
+          th(scope='col')
+        each user in data
+          - var deleteOnClick = 'window.location = "http://" + location.host + "/api/topicsmanager/users/delete/'+user.topicId+'/"';
+          tr 
+            td(value=user.userId id='userId')
+              a(href=`/api/topicsmanager/users/view/${user.userId}/`) #{user.userId}
+            td(value=user.userName id='userName') #{user.userName}
+            td(value=user.password id='password') #{user.password}
+            td(value=user.emailAddress id='emailAddress') #{user.emailAddress}
+            td(value=user.refreshToken id='refreshToken') #{user.refreshToken}
+            td(value=user.userLevel id='userLevel') #{user.userLevel}
+            td(value=user.createdBy id='createdAt') #{user.createdAt}
+            td(value=user.createdBy id='updatedAt') #{user.updatedAt}
+            td 
+              button.btn.btn-outline-primary(type='button', onclick='window.location = window.document.location.href+"edit/"') Edit
+            td
+              button.btn.btn-outline-primary(type='button', onclick=deleteOnClick) Delete
+        if showErrorMessages
+          script.
+            alert('#{showErrorMessages}')

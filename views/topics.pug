@@ -1,0 +1,178 @@
+extends layout
+
+block content
+  h1= title
+  //- debugging
+  //- p title:  #{title ? true : false}
+  //- p data: #{data ? JSON.stringify(data) : false}
+  //- p edit: #{edit ? true : false}
+  //- p editPost: #{editPost ? true : false}
+  //- p showViewTable: #{showViewTable ? true : false}
+  //- p showViewSingle: #{showViewSingle ? true : false}
+  //- p showAddTable: #{showAddTable ? true : false}
+  if showAddTable
+    p
+    .modal-dialog
+        .modal-content
+          // Modal Header
+          .modal-header
+            button.close(type="button", data-dismiss="modal", onclick='window.location = location.href.slice(0, location.href.lastIndexOf("add/")) + "view/all/"')
+              span(aria-hidden="true") ×
+              span.sr-only Close
+            h4#myModalLabel.modal-title
+              | Add Topic
+          // Modal Body
+          .modal-body
+            form(role='form' method='POST' action='/api/topicsmanager/topics/add/')
+              if data
+                div.form-group
+                if data.errorMsg
+                  label(for='error') Error! : #{JSON.stringify(data.errorMsg)}
+              div.form-group
+                label(for='topicName') Topic Name:
+                input#name.form-control(type='text', placeholder='topic name' name='topicName')
+              div.form-group
+                label(for='topicUrl') Topic URL:
+                input#name.form-control(type='text', placeholder='topic url' name='topicUrl')
+              div.form-group
+                label(for='createdBy') Current User:
+                input#name.form-control(type='text', placeholder='current user' name='createdBy')
+              div.form-group
+                label(for='episode') Planned Episode:
+                input#name.form-control(type='text', placeholder='episode' name='episode')
+              div.form-group
+                label(for='completed') Completed:
+                input#email.form-control(type='checkbox', name='completed')
+              button.btn.btn-primary(type="submit", name="submit") Submit
+              button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = location.href.slice(0, location.href.lastIndexOf("add/")) + "view/all/"')
+                | Close
+          // Modal Footer
+          .modal-footer
+            h4 footer
+    // footer
+    p.foot.text-xs-center(align='center') Topics Manager - 2023
+  else if edit
+    p
+      .modal-dialog
+          .modal-content
+            // Modal Header
+            .modal-header
+              h4#myModalLabel.modal-title
+                | Edit Topic
+            // Modal Body
+            .modal-body
+              form(role='form' method='POST' action='')
+                if data[1]
+                  div.form-group
+                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                div.form-group
+                  label(for='topicName') Topic Name:
+                  input#name.form-control(type='text', value=data[0].topicName name='topicName')
+                div.form-group
+                  label(for='topicUrl') Topic URL:
+                  input#name.form-control(type='text', value=data[0].topicUrl name='topicUrl')
+                div.form-group
+                  label(for='createdBy') Created By:
+                  input#name.form-control(type='text', value=data[0].createdBy name='createdBy')
+                div.form-group
+                  label(for='episode') Planned Episode:
+                  input#name.form-control(type='text', value=data[0].plannedEpisode name='plannedEpisode')
+                div.form-group
+                  label(for='completed') Completed:
+                  if data[0].completed == "FALSE"
+                    input#email.form-control(type='checkbox', name='completed' value=data[0].completed checked=false)
+                  else
+                    input#email.form-control(type='checkbox', name='completed' value=data[0].completed checked=true)
+                button.btn.btn-primary(type="submit", name="submit") Submit
+                button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/topics/view/all/"')
+                  | Close
+            // Modal Footer
+            .modal-footer
+              h4 footer
+      // footer
+      p.foot.text-xs-center(align='center') Topics Manager - 2023
+  else if editPost
+    p
+      .modal-dialog
+          .modal-content
+            // Modal Header
+            .modal-header
+              h4#myModalLabel.modal-title
+                | Edit Topic
+            // Modal Body
+            .modal-body
+              form(role='form' method='POST' action='')
+                if data[1]
+                  div.form-group
+                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                div.form-group
+                  label(for='topicName') Topic Name:
+                  input#name.form-control(type='text', value=data[0].topicName name='topicName')
+                div.form-group
+                  label(for='topicUrl') Topic URL:
+                  input#name.form-control(type='text', value=data[0].topicUrl name='topicUrl')
+                div.form-group
+                  label(for='createdBy') Created By:
+                  input#name.form-control(type='text', value=data[0].createdBy name='createdBy')
+                div.form-group
+                  label(for='episode') Planned Episode:
+                  input#name.form-control(type='text', value=data[0].plannedEpisode name='plannedEpisode')
+                div.form-group
+                  label(for='completed') Completed:
+                  if data[0].completed == "FALSE"
+                    input#email.form-control(type='checkbox', name='completed' value=data[0].completed checked=false)
+                  else
+                    input#email.form-control(type='checkbox', name='completed' value=data[0].completed checked=true)
+                button.btn.btn-primary(type="submit", name="submit") Submit
+                button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/topics/view/all/"')
+                  | Close
+            // Modal Footer
+            .modal-footer
+              h4 footer
+      // footer
+      p.foot.text-xs-center(align='center') Topics Manager - 2023
+  else if showViewTable
+    .table.table-hover.table-striped.table-sm.table-responsive
+      table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
+        tr
+          th(scope='col') [#]
+          th(scope='col') topicName
+          th(scope='col') topicUrl 
+          th(scope='col') createdBy 
+          th(scope='col') plannedEpisode
+        each topic in data 
+          tr 
+            td(value=topic.topicId id='topicId')
+              a(href=`/api/topicsmanager/topics/view/${topic.topicId}/`) #{topic.topicId}
+            td(value=topic.topicName id='topicName') #{topic.topicName}
+            td(value=topic.topicUrl id='topicUrl')
+              a(href=`${topic.topicUrl}`) #{topic.topicUrl}
+            td(value=topic.createdBy id='createdBy') #{topic.createdBy}
+            td(value=topic.plannedEpisode id='plannedEpisode') #{topic.plannedEpisode}
+  else if showViewSingle
+    .table.table-hover.table-striped.table-sm.table-responsive
+      table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
+        tr
+          th(scope='col') [#]
+          th(scope='col') topicName
+          th(scope='col') topicUrl 
+          th(scope='col') createdBy 
+          th(scope='col') plannedEpisode  
+          th(scope='col')
+          th(scope='col')
+        each topic in data
+          - var deleteOnClick = 'window.location = "http://" + location.host + "/api/topicsmanager/topics/delete/'+topic.topicId+'/"';
+          tr 
+            td(scope='row' value=topic.topicId id='topicId') #{topic.topicId}
+            td(value=topic.topicName id='topicName') #{topic.topicName}
+            td(value=topic.topicUrl id='topicUrl')
+              a(href=`${topic.topicUrl}`) #{topic.topicUrl}
+            td(value=topic.createdBy id='createdBy') #{topic.createdBy}
+            td(value=topic.plannedEpisode id='plannedEpisode') #{topic.plannedEpisode}
+            td 
+              button.btn.btn-outline-primary(type='button', onclick='window.location = window.document.location.href+"edit/"') Edit
+            td
+              button.btn.btn-outline-primary(type='button', onclick=deleteOnClick) Delete
+        if showErrorMessages
+          script.
+            alert('#{showErrorMessages}')
