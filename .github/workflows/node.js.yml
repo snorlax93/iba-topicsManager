@@ -1,0 +1,25 @@
+name: Node.js CI snorlaxx-server
+
+on:
+  pull_request:
+    branches: [ "develop", "master" ]
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [16.17.1]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Building and serving TopicManager
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm install
+    - run: cp --verbose ~/repo/github/bkup/db.js ~/repo/actions-runner/_work/iba-topicsManager/iba-topicsManager/configs/
+    - run: npm run action-run
