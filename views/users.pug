@@ -65,19 +65,19 @@ block content
                   div.form-group
                     label(for='error') Status Message : #{statusMessage}
                 div.form-group
-                  label(for='topicName') User Name:
+                  label(for='userName') User Name:
                   input#name.form-control(type='text', value=data[0].userName name='userName')
                 div.form-group
-                  label(for='topicUrl') Password:
+                  label(for='password') Password:
                   input#name.form-control(type='text', value='******' name='password')
                 div.form-group
-                  label(for='createdBy') Email Address:
+                  label(for='emailAddress') Email Address:
                   input#name.form-control(type='text', value=data[0].emailAddress name='emailAddress')
                 div.form-group
-                  label(for='episode') Refresh Token:
+                  label(for='refreshToken') Refresh Token:
                   input#name.form-control(type='text', value=data[0].refreshToken name='refreshToken')
                 div.form-group
-                  label(for='episode') User Level:
+                  label(for='userLevel') User Level:
                   input#name.form-control(type='text', value=data[0].userLevel name='userLevel')
                 button.btn.btn-primary(type="submit", name="submit") Submit
                 button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/users/view/all/"')
@@ -102,20 +102,20 @@ block content
                   div.form-group
                     label(for='error') Status Message : #{statusMessage}
                 div.form-group
-                  label(for='topicName') User Name:
-                  input#name.form-control(type='text', value=data[0].userName name='userName')
+                  label(for='userName') User Name:
+                  input#name.form-control(type='text', value=data.userName name='userName')
                 div.form-group
-                  label(for='topicUrl') Password:
+                  label(for='password') Password:
                   input#name.form-control(type='password', value='******' name='password')
                 div.form-group
-                  label(for='createdBy') Email Address:
-                  input#name.form-control(type='text', value=data[0].emailAddress name='emailAddress')
+                  label(for='emailAddress') Email Address:
+                  input#name.form-control(type='text', value=data.emailAddress name='emailAddress')
                 div.form-group
-                  label(for='episode') Refresh Token:
-                  input#name.form-control(type='text', value=data[0].refreshToken name='refreshToken')
+                  label(for='refreshToken') Refresh Token:
+                  input#name.form-control(type='text', value=data.refreshToken name='refreshToken')
                 div.form-group
-                  label(for='episode') User Level:
-                  input#name.form-control(type='text', value=data[0].userLevel name='userLevel')
+                  label(for='userLevel') User Level:
+                  input#name.form-control(type='text', value=data.userLevel name='userLevel')
                 button.btn.btn-primary(type="submit", name="submit") Submit
                 button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/users/view/all/"')
                   | Close
@@ -162,7 +162,7 @@ block content
           th(scope='col')
           th(scope='col')
         each user in data
-          - var deleteOnClick = 'window.location = "http://" + location.host + "/api/topicsmanager/users/delete/'+user.topicId+'/"';
+          - var deleteOnClick = 'window.location = "http://" + location.host + "/api/topicsmanager/users/delete/'+user.userId+'/"';
           tr 
             td(value=user.userId id='userId')
               a(href=`/api/topicsmanager/users/view/${user.userId}/`) #{user.userId}

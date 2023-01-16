@@ -151,19 +151,19 @@ router.post('/add/', async function (req, res, next) {
 /**
  * route: /delete/123/
  * method: GET
- * description: is to delete user data to database per topicId from req
+ * description: is to delete user data to database per userId from req
  */
 
-router.get('/delete/:topicId/', async function (req, res, next) {
+router.get('/delete/:userId/', async function (req, res, next) {
     let userData = {
-        'userId': req.params.topicId
+        'userId': req.params.userId
     }
     const controllerResponse = await controller.deleteUser(userData);
     if (controllerResponse.statusCode == 'Success') {
         res.redirect('/api/topicsmanager/users/view/all/');
     } else {
         res.render('users', {
-            title: 'View topicId',
+            title: 'View userId',
             data: controllerResponse.data,
             statusCode: controllerResponse.statusCode,
             statusMessage: controllerResponse.statusMessage,

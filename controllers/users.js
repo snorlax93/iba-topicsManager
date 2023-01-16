@@ -135,13 +135,13 @@ const updateUser = async (userData) => {
 };
 
 /**
- * method: deleteTopic
+ * method: deleteUser
  * params: object: {userId: int}
  * description: deletes the user based on userId
  * returns: { data: obj, statusCode : string, statusMessage : string }
  */
 
-const deleteTopic = async (userData) => {
+const deleteUser = async (userData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
 
     let query = {
@@ -160,5 +160,5 @@ module.exports = {
     createUser,
     getUsers,
     updateUser,
-    deleteTopic
+    deleteUser
 };
