@@ -86,6 +86,7 @@ const getErrorMessage = {
     // 0 - 999 :General App
     0: 'Main Route Accessed',
     1: 'Move between routes',
+    2: 'Accessing system route',
 
 
     // 1000 - 1999 : topic logging
