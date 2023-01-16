@@ -4,12 +4,15 @@ block content
   h1= title
   //- debugging
   //- p title:  #{title ? true : false}
-  //- p data: #{data ? JSON.stringify(data) : false}
+  //- p data: #{data ? true : false}
   //- p edit: #{edit ? true : false}
   //- p editPost: #{editPost ? true : false}
   //- p showViewTable: #{showViewTable ? true : false}
   //- p showViewSingle: #{showViewSingle ? true : false}
   //- p showAddTable: #{showAddTable ? true : false}
+  //- p statusCode: #{statusCode ? statusCode : false}
+  //- p statusMessage: #{statusMessage ? statusMessage : false}
+  //- p showErrorMessage: #{showErrorMessage ? showErrorMessage : false}
   if showAddTable
     p
     .modal-dialog
@@ -24,10 +27,9 @@ block content
           // Modal Body
           .modal-body
             form(role='form' method='POST' action='/api/topicsmanager/topics/add/')
-              if data
-                div.form-group
-                if data.errorMsg
-                  label(for='error') Error! : #{JSON.stringify(data.errorMsg)}
+              if statusMessage
+                script.
+                  alert('#{statusMessage}')
               div.form-group
                 label(for='topicName') Topic Name:
                 input#name.form-control(type='text', placeholder='topic name' name='topicName')
@@ -51,7 +53,7 @@ block content
             h4 footer
     // footer
     p.foot.text-xs-center(align='center') Topics Manager - 2023
-  else if edit
+  else if edit && data
     p
       .modal-dialog
           .modal-content
@@ -62,9 +64,9 @@ block content
             // Modal Body
             .modal-body
               form(role='form' method='POST' action='')
-                if data[1]
+                if showErrorMessages
                   div.form-group
-                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                    label(for='error') Status Message : #{statusMessage}
                 div.form-group
                   label(for='topicName') Topic Name:
                   input#name.form-control(type='text', value=data[0].topicName name='topicName')
@@ -91,7 +93,7 @@ block content
               h4 footer
       // footer
       p.foot.text-xs-center(align='center') Topics Manager - 2023
-  else if editPost
+  else if editPost && data
     p
       .modal-dialog
           .modal-content
@@ -102,27 +104,27 @@ block content
             // Modal Body
             .modal-body
               form(role='form' method='POST' action='')
-                if data[1]
+                if showErrorMessages
                   div.form-group
-                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                    label(for='error') Status Message : #{statusMessage}
                 div.form-group
                   label(for='topicName') Topic Name:
-                  input#name.form-control(type='text', value=data[0].topicName name='topicName')
+                  input#name.form-control(type='text', value=data.topicName name='topicName')
                 div.form-group
                   label(for='topicUrl') Topic URL:
-                  input#name.form-control(type='text', value=data[0].topicUrl name='topicUrl')
+                  input#name.form-control(type='text', value=data.topicUrl name='topicUrl')
                 div.form-group
                   label(for='createdBy') Created By:
-                  input#name.form-control(type='text', value=data[0].createdBy name='createdBy')
+                  input#name.form-control(type='text', value=data.createdBy name='createdBy')
                 div.form-group
                   label(for='episode') Planned Episode:
-                  input#name.form-control(type='text', value=data[0].plannedEpisode name='plannedEpisode')
+                  input#name.form-control(type='text', value=data.plannedEpisode name='plannedEpisode')
                 div.form-group
                   label(for='completed') Completed:
-                  if data[0].completed == "FALSE"
-                    input#email.form-control(type='checkbox', name='completed' value=data[0].completed checked=false)
+                  if data.completed == "FALSE"
+                    input#email.form-control(type='checkbox', name='completed' value=data.completed checked=false)
                   else
-                    input#email.form-control(type='checkbox', name='completed' value=data[0].completed checked=true)
+                    input#email.form-control(type='checkbox', name='completed' value=data.completed checked=true)
                 button.btn.btn-primary(type="submit", name="submit") Submit
                 button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/topics/view/all/"')
                   | Close
@@ -131,7 +133,7 @@ block content
               h4 footer
       // footer
       p.foot.text-xs-center(align='center') Topics Manager - 2023
-  else if showViewTable
+  else if showViewTable && data
     .table.table-hover.table-striped.table-sm.table-responsive
       table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
         tr
@@ -149,7 +151,7 @@ block content
               a(href=`${topic.topicUrl}`) #{topic.topicUrl}
             td(value=topic.createdBy id='createdBy') #{topic.createdBy}
             td(value=topic.plannedEpisode id='plannedEpisode') #{topic.plannedEpisode}
-  else if showViewSingle
+  else if showViewSingle && data
     .table.table-hover.table-striped.table-sm.table-responsive
       table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
         tr
@@ -175,4 +177,8 @@ block content
               button.btn.btn-outline-primary(type='button', onclick=deleteOnClick) Delete
         if showErrorMessages
           script.
-            alert('#{showErrorMessages}')
+            alert('#{statusMessage}')
+  else if !data
+    script.
+      alert('#{statusMessage}')
+    h2 NEED DATA!!

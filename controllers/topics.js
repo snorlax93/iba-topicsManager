@@ -1,144 +1,165 @@
-const mariadb = require('../utils/db');
+const databaseController = require('./database');
+const commonHelper = require('../helpers/common');
+
+
+/**
+ * method: createTopic
+ * params: array: [topidData]
+ * description: adds the topic data to the database
+ * returns: { data: null, statusCode : string, statusMessage : string }
+ */
 
 const createTopic = async (topicData) => {
-    let returnData = {
-        errorMsg: "Need to include TopicUrl and TopicName"
-    };
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+    let validateInputs = validateTopic(topicData);
 
-    if (topicData) {
-        if (topicData.topicName !== null && topicData.topicName != "") {
-            if (topicData.topicUrl !== null && topicData.topicUrl != "") {
-                let dateTime = new Date()
-                    .toISOString()
-                    .slice(0, 19)
-                    .replace('T', ' ');
+    if (validateInputs.statusCode == 'Success') {
+        topicData.reqBody.completed = topicData.reqBody.completed ? 'TRUE' : 'FALSE';
 
-                const queryData = [
-                    topicData.topicId || null, 
-                    topicData.topicName, 
-                    topicData.topicUrl, 
-                    topicData.createdBy || "TESTING", 
-                    topicData.episode || "TESTING", 
-                    topicData.completed || "FALSE", 
-                    dateTime, dateTime
-                ]
+        delete topicData.reqBody.submit;
+        topicData.reqBody['createdAt'] = await commonHelper.getDateTime();
+        topicData.reqBody['updatedAt'] = await commonHelper.getDateTime();
 
-                let conn;
-
-                try {
-                    conn = await mariadb.pool.getConnection();
-                    await conn.query("INSERT INTO topics value (?, ?, ?, ?, ?, ?, ?, ?)", queryData);
-                } catch (err) {
-                    throw err;
-                } finally {
-                    if (conn) await conn.end();
-                    returnData = queryData;
-                };
-
-            } else {
-                returnData = {
-                    errorMsg: "no topic url entered"
-                };
+        let query = {
+            'queryString': 'INSERT INTO topics (topicName, topicUrl, createdBy, plannedEpisode, completed, createdAt, updatedAt) value (?, ?, ?, ?, ?, ?, ?)',
+            'options': {
+                'tableName': 'topics',
+                'queryData': commonHelper.setToArray(topicData.reqBody)
             }
+        };
 
-        } else {
-            returnData = {
-                errorMsg: "no topic name entered"
-            };
-        }
+        returnData = await databaseController.queryDatabase(query);
+    } else {
+        returnData.data = null;
+        returnData.statusCode = validateInputs.statusCode;
+        returnData.statusMessage = validateInputs.statusMessage;
     }
 
     return returnData;
 };
 
-const getTopics = async (flags) => {
-    let topics = [];
-    let query = "";
+/**
+ * method: validateTopic
+ * params: array: [topidData]
+ * description: confirms if required fields are present and not null/empty strings
+ * returns: { statusCode : string, statusMessage : string }
+ */
 
-    if (flags && flags.completed && flags.completed === "TRUE") {
-        query = "SELECT * FROM topics";
-    } else {
-        query = "SELECT * FROM topics WHERE completed != \"TRUE\"";
-    }
-    // make db call with query made above
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query);
-        for (let i = 0; i <= res.length - 1; i++) {
-            topics.push(res[i]);
+const validateTopic = (topicData) => {
+    let returnData = {
+        statusCode: 'Success',
+        statusMessage: null
+    };
+
+    if (topicData) {
+        if (topicData.reqBody.topicName == null || topicData.reqBody.topicName == '') {
+            returnData = {
+                data: null,
+                statusCode: 'Error',
+                statusMessage: 'Need to enter a Topic Name'
+            };
+        } else if (topicData.reqBody.topicUrl == null || topicData.reqBody.topicUrl == '') {
+            returnData = {
+                data: null,
+                statusCode: 'Error',
+                statusMessage: 'Need to enter a Topic Url'
+            };
+        } else if ((topicData.reqBody.topicName == null || topicData.reqBody.topicName == '') && (topicData.reqBody.topicUrl == null || topicData.reqBody.topicUrl == '')) {
+            returnData = {
+                statusCode: 'Error',
+                statusMessage: 'Need to include TopicUrl and TopicName'
+            };
         }
-    } catch (err) {
-        throw err;
-    } finally {
-        if (conn) await conn.end();
+    }
+
+    return returnData;
+}
+
+/**
+ * method: getTopics
+ * params: object: {completed: boolean, topicId: int}
+ * description: get all topics based on flag (completed)
+ * returns: { statusCode : string, statusMessage : string }
+ */
+
+const getTopics = async (flags) => {
+    let queryString = 'SELECT * FROM topics WHERE completed = \'FALSE\'';;
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+
+    if (flags) {
+        if (flags.completed) {queryString = 'SELECT * FROM topics WHERE (completed = \'TRUE\' OR completed = \'FALSE\')';}
+        if (flags.singleTopic) {queryString = 'SELECT * FROM topics WHERE (completed = \'TRUE\' OR completed = \'FALSE\')';}
+        if (flags.topicId) {queryString += ' AND topicId = \''+flags.topicId+'\'';}
+    }
+
+    let query = {
+        'queryString': queryString,
+        'options': {
+            'tableName': 'topics',
+            'queryData': null
+        }
     };
 
-    // return topics array
-    return topics;
+    returnData = await databaseController.queryDatabase(query);
+
+    return returnData;
 };
 
-const getTopic = async (topicId) => {
-    let topic = [];
-    let query = "SELECT * FROM ibatool.topics WHERE topicId = ?";
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query, topicId);
-        topic.push(res[0]);
-    } catch (err) {
-        throw err;
-    } finally {
-        if (conn) await conn.end();
-    };
+/**
+ * method: updateTopic
+ * params: object: {topicId: int, reqBody: obj}
+ * description: updates the topic based on topicId
+ * returns: { data: obj, statusCode : string, statusMessage : string }
+ */
 
-    return topic;
+const updateTopic = async (topicData) => {
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+    let validateInputs = validateTopic(topicData);
+
+    if (validateInputs.statusCode == 'Success') {
+        topicData.reqBody['topicId'] = topicData.topicId;
+        let query = {
+            'queryString': 'UPDATE topics SET topicName=?, topicUrl=?, createdBy=?, plannedEpisode=?, completed=? WHERE topicId=?',
+            'options': {
+                'tableName': 'topics',
+                'queryData': commonHelper.setToArray(topicData.reqBody)
+            }
+        };
+        returnData = await databaseController.queryDatabase(query);
+    } else {
+        returnData.data = null;
+        returnData.statusCode = validateInputs.statusCode;
+        returnData.statusMessage = validateInputs.statusMessage;
+    }    
+
+    return returnData;
 };
 
-const updateTopic = async (topicId, reqBody) => {
-    let topic = [];
-    let query = "UPDATE topics SET topicName=?, topicUrl=?, createdBy=?, plannedEpisode=?, completed=? WHERE topicId=?";
-    let queryData = [
-        reqBody.topicName ? reqBody.topicName : '', 
-        reqBody.topicUrl ? reqBody.topicUrl : '', 
-        reqBody.createdBy ? reqBody.createdBy : '', 
-        reqBody.plannedEpisode ? reqBody.plannedEpisode : '', 
-        reqBody.completed ? reqBody.completed : 'FALSE'
-    ];
-    queryData.push(topicId);
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query, queryData);
-        res.affectedRows > 0 ? topic = true : topic = false;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if (conn) await conn.end();
+/**
+ * method: deleteTopic
+ * params: object: {topicId: int}
+ * description: deletes the topic based on topicId
+ * returns: { data: obj, statusCode : string, statusMessage : string }
+ */
+
+const deleteTopic = async (topicData) => {
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+
+    let query = {
+        'queryString': 'DELETE FROM topics WHERE topicId=?',
+        'options': {
+            'tableName': 'topics',
+            'queryData': [topicData.topicId]
+        }
     };
+    returnData = await databaseController.queryDatabase(query);
 
-    return topic;
-};
-
-const deleteTopic = async (topicId) => {
-    let topic = [];
-    let query = "DELETE FROM topics WHERE topicId=?";
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query, [topicId]);
-        res.affectedRows > 0 ? topic = true : topic = false;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if (conn) await conn.end();
-    };
-
-    return topic;
+    return returnData;
 }
 
 module.exports = {
     createTopic,
     getTopics,
-    getTopic,
     updateTopic,
     deleteTopic
 };
