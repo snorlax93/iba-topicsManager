@@ -148,7 +148,7 @@ block content
               a(href=`/api/topicsmanager/topics/view/${topic.topicId}/`) #{topic.topicId}
             td(value=topic.topicName id='topicName') #{topic.topicName}
             td(value=topic.topicUrl id='topicUrl')
-              a(href=`${topic.topicUrl}`) #{topic.topicUrl}
+              a(href=`${topic.topicUrl}`, target='_blank') #{topic.topicUrl}
             td(value=topic.createdBy id='createdBy') #{topic.createdBy}
             td(value=topic.plannedEpisode id='plannedEpisode') #{topic.plannedEpisode}
   else if showViewSingle && data
@@ -168,7 +168,7 @@ block content
             td(scope='row' value=topic.topicId id='topicId') #{topic.topicId}
             td(value=topic.topicName id='topicName') #{topic.topicName}
             td(value=topic.topicUrl id='topicUrl')
-              a(href=`${topic.topicUrl}`) #{topic.topicUrl}
+              a(href=`${topic.topicUrl}`, target='_blank') #{topic.topicUrl}
             td(value=topic.createdBy id='createdBy') #{topic.createdBy}
             td(value=topic.plannedEpisode id='plannedEpisode') #{topic.plannedEpisode}
             td 
