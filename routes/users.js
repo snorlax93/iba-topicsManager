@@ -87,7 +87,7 @@ router.get('/view/:userId/edit/', async function (req, res, next) {
 */
 
 router.post('/view/:userId/edit/', async function (req, res, next) {
-    let flags = {
+    let userData = {
         'userId': req.params.userId,
         'reqBody': {
             'userName': req.body.userName,
@@ -101,7 +101,7 @@ router.post('/view/:userId/edit/', async function (req, res, next) {
     const controllerResponse = await controller.updateUser(flags);
     res.render('users', {
         title: 'View Single',
-        data: controllerResponse.data ? controllerResponse.data : topicData.reqBody,
+        data: controllerResponse.data ? controllerResponse.data : userData.reqBody,
         statusCode: controllerResponse.statusCode,
         statusMessage: controllerResponse.statusMessage,
         showErrorMessages: controllerResponse.statusCode != 'Success' ? true : false,
@@ -132,11 +132,11 @@ router.get('/add/', function (req, res, next) {
  */
 
 router.post('/add/', async function (req, res, next) {
-    let topicData = {
+    let userData = {
         'userId': null,
         'reqBody': req.body
     }
-    const controllerResponse = await controller.createUser(topicData);
+    const controllerResponse = await controller.createUser(userData);
     res.render('users', {
         title: 'Add',
         data: controllerResponse.data,
@@ -155,10 +155,10 @@ router.post('/add/', async function (req, res, next) {
  */
 
 router.get('/delete/:topicId/', async function (req, res, next) {
-    let topicData = {
+    let userData = {
         'userId': req.params.topicId
     }
-    const controllerResponse = await controller.deleteUser(topicData);
+    const controllerResponse = await controller.deleteUser(userData);
     if (controllerResponse.statusCode == 'Success') {
         res.redirect('/api/topicsmanager/users/view/all/');
     } else {
