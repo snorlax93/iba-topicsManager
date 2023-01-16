@@ -1,5 +1,7 @@
 var express = require('express');
 var router = express.Router();
+const logger = require('../controllers/logging');
+const commonHelper = require('../helpers/common');
 
 /**
  * main route: /system/
@@ -11,12 +13,12 @@ var router = express.Router();
  * description: to kill server (used in pipeline should not exist in production)
  */
 
-router.get('/complete/:status/:prNum', function (req, res, next) {
+router.get('/complete/:status/:prNum', async function (req, res, next) {
   const status = req.params.status;
-  const prLink = req.params.prNum;
+  const prNum = req.params.prNum;
 
   // will have to implement fully
-  logger.setLoggingInfo('systemRoute', 2, 'info', {'stats': status, 'prNum': prNum}, flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
+  await logger.setLoggingInfo('systemRoute', 2, 'info', 'prrev', {'stats': status, 'prNum': prNum}, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
 
   switch (status) {
     case 'pass':

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const mariadb = require('./database');
+const databaseController = require('./database');
 const commonHelper = require('../helpers/common');
 
 /**
@@ -45,7 +45,8 @@ const logEvent = async (logString) => {
  */
 
 const generateEvent = async (eventObj) => {
-    const logString = `LOG: [${await commonHelper.getDateTime()}] - ${getSeverity[eventObj.eventSeverity]} | ${eventObj.eventCode} - ${getErrorMessage[eventObj.eventType]} occurred: ${getErrorMessage[eventObj.eventCode]} | controllerMessage: ${JSON.stringify(eventObj.eventData)}. userDetails { user: ${eventObj.userDetails.userId}, IP: ${eventObj.userDetails.userIpAddress}, host: ${eventObj.userDetails.reqHost} }`;
+    let dateTime = await commonHelper.getDateTime();
+    const logString = `LOG: [${dateTime}] - ${getSeverity[eventObj.eventSeverity]} | ${eventObj.eventName} - ${getEventType[eventObj.eventType]} occurred: ${getEventCode[eventObj.eventCode]} | controllerMessage: ${JSON.stringify(eventObj.eventData)}. userDetails { user: ${eventObj.userDetails.userId}, IP: ${eventObj.userDetails.userIpAddress}, host: ${eventObj.userDetails.reqHost} }`;
     await logEvent(logString);
 }
 
@@ -76,18 +77,26 @@ const getSeverity = {
 }
 
 /**
- * method: getErrorMessage
+ * method: getEventType
  * enum: multiple
  * description: customize the error codes and messages the app can support
  * returns: N/A
  */
 
-const getErrorMessage = {
+const getEventType = {
     // 0 - 999 :General App
     0: 'Main Route Accessed',
     1: 'Move between routes',
-    2: 'Accessing system route',
+    2: 'Accessing system route'
+}
 
+const getEventCode = {
+
+    // event names
+    info: 'INFO',
+    error: 'ERROR',
+    trans: 'TRANSACTION',
+    prrev: 'PR-REVIEW',
 
     // 1000 - 1999 : topic logging
     1000: 'Add a topic',
