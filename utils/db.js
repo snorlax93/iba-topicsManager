@@ -10,3 +10,5 @@ const pool = mariadb.createPool({
     connectionLimit: dbConfig.connectionLimit,
     port: dbConfig.port
 });
+
+module.exports = { pool };
