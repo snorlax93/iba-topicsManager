@@ -98,7 +98,7 @@ router.post('/view/:userId/edit/', async function (req, res, next) {
         }
     }
 
-    const controllerResponse = await controller.updateUser(flags);
+    const controllerResponse = await controller.updateUser(userData);
     res.render('users', {
         title: 'View Single',
         data: controllerResponse.data ? controllerResponse.data : userData.reqBody,
