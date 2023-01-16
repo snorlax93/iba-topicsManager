@@ -22,6 +22,7 @@ router.get('/view/all/', async function (req, res, next) {
         'topicId': null,
         'singleTopic': false
     }
+    
     logger.setLoggingInfo('topicsController', 1, 'info', '1008', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
 
     const controllerResponse = await controller.getTopics(flags);
