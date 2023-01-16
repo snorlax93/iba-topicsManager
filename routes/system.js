@@ -11,12 +11,12 @@ var router = express.Router();
  * description: to kill server (used in pipeline should not exist in production)
  */
 
-router.get('/complete/:status/:prLink', function (req, res, next) {
+router.get('/complete/:status/:prNum', function (req, res, next) {
   const status = req.params.status;
-  const prLink = req.params.prLink;
+  const prLink = req.params.prNum;
 
   // will have to implement fully
-  // logger.setLoggingInfo('systemRoute', 2, 'info', {'stats': status, 'prLink': prLink}, flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
+  logger.setLoggingInfo('systemRoute', 2, 'info', {'stats': status, 'prNum': prNum}, flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
 
   switch (status) {
     case 'pass':
