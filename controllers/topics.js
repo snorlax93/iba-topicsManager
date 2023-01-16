@@ -1,6 +1,6 @@
-const databaseController = require('./database');
+const topicsController = require('./database');
 const commonHelper = require('../helpers/common');
-
+const logger = require('../controllers/logging');
 
 /**
  * method: createTopic
@@ -28,13 +28,15 @@ const createTopic = async (topicData) => {
             }
         };
 
-        returnData = await databaseController.queryDatabase(query);
+        await logger.setLoggingInfo('topicsController', 4, 'info', '1018', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+        returnData = await topicsController.queryDatabase(query);
     } else {
         returnData.data = null;
         returnData.statusCode = validateInputs.statusCode;
         returnData.statusMessage = validateInputs.statusMessage;
     }
 
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1019', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return returnData;
 };
 
@@ -45,7 +47,7 @@ const createTopic = async (topicData) => {
  * returns: { statusCode : string, statusMessage : string }
  */
 
-const validateTopic = (topicData) => {
+const validateTopic = async (topicData) => {
     let returnData = {
         statusCode: 'Success',
         statusMessage: null
@@ -72,6 +74,7 @@ const validateTopic = (topicData) => {
         }
     }
 
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1020', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return returnData;
 }
 
@@ -100,7 +103,11 @@ const getTopics = async (flags) => {
         }
     };
 
-    returnData = await databaseController.queryDatabase(query);
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1021', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
+    returnData = await topicsController.queryDatabase(query);
+
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1022', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
     return returnData;
 };
@@ -125,13 +132,15 @@ const updateTopic = async (topicData) => {
                 'queryData': commonHelper.setToArray(topicData.reqBody)
             }
         };
-        returnData = await databaseController.queryDatabase(query);
+        await logger.setLoggingInfo('topicsController', 4, 'info', '1023', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+        returnData = await topicsController.queryDatabase(query);
     } else {
         returnData.data = null;
         returnData.statusCode = validateInputs.statusCode;
         returnData.statusMessage = validateInputs.statusMessage;
     }    
 
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1024', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return returnData;
 };
 
@@ -152,7 +161,11 @@ const deleteTopic = async (topicData) => {
             'queryData': [topicData.topicId]
         }
     };
-    returnData = await databaseController.queryDatabase(query);
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1025', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
+    returnData = await topicsController.queryDatabase(query);
+
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1026', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
     return returnData;
 }

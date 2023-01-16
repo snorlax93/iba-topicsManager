@@ -1,4 +1,5 @@
 const mariadb = require('../utils/db');
+const logger = require('../controllers/logging');
 
 /**
  * method: queryDatabase
@@ -18,7 +19,12 @@ const queryDatabase = async (query) => {
     const connection = await mariadb.pool.getConnection();
 
     try {
+
+        await logger.setLoggingInfo('databaseController', 3, 'info', '4000', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
         const response = await connection.query(query.queryString, query.options.queryData);
+
+        await logger.setLoggingInfo('databaseController', 3, 'info', '4001', response, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
         if (response.length) {
             for (let i = 0; i <= response.length - 1; i++) {
@@ -41,6 +47,7 @@ const queryDatabase = async (query) => {
     } catch (error) {
         databaseReturn.statusCode = 'Error';
         databaseReturn.statusMessage = JSON.stringify(error.text);
+        await logger.setLoggingInfo('databaseController', 3, 'error', '4003', databaseReturn, {'userId': null, 'userIpAddress': null, 'reqHost': null});
         // log error
     } finally {
         if (connection) {
@@ -48,6 +55,7 @@ const queryDatabase = async (query) => {
         };
     }
 
+    await logger.setLoggingInfo('databaseController', 3, 'info', '4002', databaseReturn, {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return databaseReturn;
 };
 

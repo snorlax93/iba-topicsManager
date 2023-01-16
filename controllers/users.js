@@ -1,4 +1,5 @@
 const databaseController = require('./database');
+const logger = require('../controllers/logging');
 const commonHelper = require('../helpers/common');
 
 /**
@@ -28,6 +29,8 @@ const createUser = async (userData) => {
             }
         };
 
+        await logger.setLoggingInfo('usersController', 4, 'info', '2017', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
         returnData = await databaseController.queryDatabase(query);
     } else {
         returnData.data = null;
@@ -35,6 +38,7 @@ const createUser = async (userData) => {
         returnData.statusMessage = validateInputs.statusMessage;
     }
 
+    await logger.setLoggingInfo('usersController', 4, 'info', '2018', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return returnData;
 }
 
@@ -45,7 +49,7 @@ const createUser = async (userData) => {
  * returns: { statusCode : string, statusMessage : string }
  */
 
-const validateUser = (userData) => {
+const validateUser = async (userData) => {
     let returnData = {
         statusCode: 'Success',
         statusMessage: null
@@ -72,6 +76,7 @@ const validateUser = (userData) => {
         }
     }
 
+    await logger.setLoggingInfo('usersController', 4, 'info', '2019', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return returnData;
 }
 
@@ -98,7 +103,11 @@ const getUsers = async (flags) => {
         }
     };
 
+    await logger.setLoggingInfo('usersController', 4, 'info', '2020', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
     returnData = await databaseController.queryDatabase(query);
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2021', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
     return returnData;
 };
@@ -124,12 +133,17 @@ const updateUser = async (userData) => {
                 'queryData': commonHelper.setToArray(userData.reqBody)
             }
         };
+        
+        await logger.setLoggingInfo('usersController', 4, 'info', '2022', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
         returnData = await databaseController.queryDatabase(query);
     } else {
         returnData.data = null;
         returnData.statusCode = validateInputs.statusCode;
         returnData.statusMessage = validateInputs.statusMessage;
     }    
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2023', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
     return returnData;
 };
@@ -151,7 +165,12 @@ const deleteUser = async (userData) => {
             'queryData': [userData.userId]
         }
     };
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2024', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
     returnData = await databaseController.queryDatabase(query);
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2025', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
     return returnData;
 }

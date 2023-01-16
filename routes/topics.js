@@ -17,16 +17,19 @@ const commonHelper = require('../helpers/common');
  */
 
 router.get('/view/all/', async function (req, res, next) {
+    
     let flags = {
         'completed': req.query.view == 'all' ? true : false,
         'topicId': null,
         'singleTopic': false
     }
 
-    // will have to implement fully
-    // logger.setLoggingInfo('topicsController', 1, 'prrev', '1008', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1008', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
 
     const controllerResponse = await controller.getTopics(flags);
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1009', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+    
     res.render('topics', {
         title: 'View All',
         data: controllerResponse.data,
@@ -44,12 +47,19 @@ router.get('/view/all/', async function (req, res, next) {
  */
 
 router.get('/view/:topicId/', async function (req, res, next) {
+    
     let flags = {
         'completed': req.query.view == 'all' ? true : false,
         'topicId': req.params.topicId,
         'singleTopic': true
     }
+
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1008', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+    
     const controllerResponse = await controller.getTopics(flags);
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1009_A', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+    
     res.render('topics', {
         title: 'View topicId',
         data: controllerResponse.data,
@@ -68,12 +78,19 @@ router.get('/view/:topicId/', async function (req, res, next) {
  */
 
 router.get('/view/:topicId/edit/', async function (req, res, next) {
+    
     let flags = {
         'completed': req.query.view == 'all' ? true : false,
         'topicId': req.params.topicId,
         'singleTopic': true
     }
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1008', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+
     const controllerResponse = await controller.getTopics(flags);
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1009_B', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+    
     res.render('topics', {
         title: 'View topicId',
         data: controllerResponse.data,
@@ -91,6 +108,7 @@ router.get('/view/:topicId/edit/', async function (req, res, next) {
  */
 
 router.post('/view/:topicId/edit/', async function (req, res, next) {
+    
     let topicData = {
         'topicId': req.params.topicId,
         'reqBody': {
@@ -101,7 +119,13 @@ router.post('/view/:topicId/edit/', async function (req, res, next) {
             'completed': req.body.completed ? 'TRUE' : 'FALSE'
         }
     }
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1010', topicData, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+
     const controllerResponse = await controller.updateTopic(topicData);
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1011', topicData, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+
     res.render('topics', {
         title: 'View Single',
         data: controllerResponse.data ? controllerResponse.data : topicData.reqBody,
@@ -119,7 +143,8 @@ router.post('/view/:topicId/edit/', async function (req, res, next) {
  * description: is to show form to add single topic
  */
 
-router.get('/add/', function (req, res, next) {
+router.get('/add/', async function (req, res, next) {
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1016', 'null', {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
     res.render('topics', {
         title: 'Add',
         showAddTable: true
@@ -133,11 +158,18 @@ router.get('/add/', function (req, res, next) {
  */
 
 router.post('/add/', async function (req, res, next) {
+    
     let topicData = {
         'topicId': null,
         'reqBody': req.body
     }
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1012', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+
     const controllerResponse = await controller.createTopic(topicData);
+    
+    await logger.setLoggingInfo('topicsController', 1, 'info', '1013', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
+    
     res.render('topics', {
         title: 'Add',
         data: controllerResponse.data,
@@ -161,8 +193,10 @@ router.get('/delete/:topicId/', async function (req, res, next) {
     }
     const controllerResponse = await controller.deleteTopic(topicData);
     if (controllerResponse.statusCode == 'Success') {
+        await logger.setLoggingInfo('topicsController', 1, 'info', '1017', topicData, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
         res.redirect('/api/topicsmanager/topics/view/all/');
     } else {
+        await logger.setLoggingInfo('topicsController', 1, 'info', '1015', topicData, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl});
         res.render('topics', {
             title: 'View topicId',
             data: controllerResponse.data,
