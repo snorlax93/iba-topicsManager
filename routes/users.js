@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 const controller = require("../controllers/users");
+const logger = require('../controllers/logging');
+const commonHelper = require('../helpers/common');
 
 /**
  * main route: /api/usersmanager/users/
@@ -10,16 +12,25 @@ const controller = require("../controllers/users");
  * route: /view/all
  * method: GET
  * description: is to bring back all of the users in the database
- * data: [{user}, {user}]
  */
 
 router.get('/view/all/', async function (req, res, next) {
-  const controllerResponse = await controller.getUsers();
-  res.render('users', {
-      title: 'View All',
-      data: controllerResponse,
-      showViewTable: true
-  });
+    let flags = {
+        'userId': null
+    }
+
+    // will have to implement fully
+    // logger.setLoggingInfo('usersController', 1, 'info', '2007', flags, {'userId': null, 'userIpAddress': await commonHelper.getIPAddress('https://api.ipify.org/?format=json'), 'reqHost': req.originalUrl})
+
+    const controllerResponse = await controller.getUsers(flags);
+    res.render('users', {
+        title: 'View All',
+        data: controllerResponse.data,
+        statusCode: controllerResponse.statusCode,
+        statusMessage: controllerResponse.statusMessage,
+        showErrorMessages: controllerResponse.statusCode != 'Success' ? true : false,
+        showViewTable: true
+    });
 });
 
 /**
@@ -30,13 +41,19 @@ router.get('/view/all/', async function (req, res, next) {
 */
 
 router.get('/view/:userId/', async function (req, res, next) {
-  const controllerResponse = await controller.getUser(req.params.userId);
-  res.render('users', {
-      title: 'View userId',
-      data: controllerResponse,
-      edit: false,
-      showViewSingle: true
-  });
+    let flags = {
+        'userId': req.params.userId
+    }
+    const controllerResponse = await controller.getUsers(flags);
+    res.render('users', {
+        title: 'View userId',
+        data: controllerResponse.data,
+        statusCode: controllerResponse.statusCode,
+        statusMessage: controllerResponse.statusMessage,
+        showErrorMessages: controllerResponse.statusCode != 'Success' ? true : false,
+        edit: false,
+        showViewSingle: true
+    });
 });
 
 /**
@@ -47,13 +64,18 @@ router.get('/view/:userId/', async function (req, res, next) {
 */
 
 router.get('/view/:userId/edit/', async function (req, res, next) {
-  const controllerResponse = await controller.getUser(req.params.userId);
-  res.render('users', {
-      title: 'View userId',
-      data: controllerResponse,
-      edit: true,
-      showViewSingle: true
-  });
+    let flags = {
+        'userId': req.params.userId
+    }
+    const controllerResponse = await controller.getUsers(flags);
+    res.render('users', {
+        title: 'View userId',
+        data: controllerResponse.data,
+        statusCode: controllerResponse.statusCode,
+        statusMessage: controllerResponse.statusMessage,
+        edit: true,
+        showViewSingle: true
+    });
 });
 
 /**
@@ -65,22 +87,26 @@ router.get('/view/:userId/edit/', async function (req, res, next) {
 */
 
 router.post('/view/:userId/edit/', async function (req, res, next) {
-  const formData = {
-      'userName': req.body.userName,
-      'emailAddress': req.body.emailAddress,
-      'password': req.body.password,
-      'refreshToken': req.body.refreshToken,
-      'userLevel': req.body.userLevel
-  };
+    let userData = {
+        'userId': req.params.userId,
+        'reqBody': {
+            'userName': req.body.userName,
+            'emailAddress': req.body.emailAddress,
+            'password': req.body.password,
+            'refreshToken': req.body.refreshToken,
+            'userLevel': req.body.userLevel
+        }
+    }
 
-  const controllerResponse = await controller.updateUser(req.params.userId, formData);
-  res.render('users', {
-      title: 'View Single',
-      data: [formData, {
-          "statusMsg": controllerResponse ? "Successfully Edited" : "There was an issue editing"
-      }],
-      editPost: true
-  });
+    const controllerResponse = await controller.updateUser(userData);
+    res.render('users', {
+        title: 'View Single',
+        data: controllerResponse.data ? controllerResponse.data : userData.reqBody,
+        statusCode: controllerResponse.statusCode,
+        statusMessage: controllerResponse.statusMessage,
+        showErrorMessages: controllerResponse.statusCode != 'Success' ? true : false,
+        editPost: true
+    });
 });
 
 /**
@@ -106,13 +132,46 @@ router.get('/add/', function (req, res, next) {
  */
 
 router.post('/add/', async function (req, res, next) {
-    const controllerResponse = await controller.createUser(req.body);
+    let userData = {
+        'userId': null,
+        'reqBody': req.body
+    }
+    const controllerResponse = await controller.createUser(userData);
     res.render('users', {
         title: 'Add',
-        data: controllerResponse,
-        showErrorMessages: controllerResponse.errorMsg ? controllerResponse.errorMsg : null,
+        data: controllerResponse.data,
+        statusCode: controllerResponse.statusCode,
+        statusMessage: controllerResponse.statusMessage,
+        showErrorMessages: controllerResponse.statusCode != 'Success' ? true : false,
         showAddTable: true
     });
+});
+
+
+/**
+ * route: /delete/123/
+ * method: GET
+ * description: is to delete user data to database per userId from req
+ */
+
+router.get('/delete/:userId/', async function (req, res, next) {
+    let userData = {
+        'userId': req.params.userId
+    }
+    const controllerResponse = await controller.deleteUser(userData);
+    if (controllerResponse.statusCode == 'Success') {
+        res.redirect('/api/topicsmanager/users/view/all/');
+    } else {
+        res.render('users', {
+            title: 'View userId',
+            data: controllerResponse.data,
+            statusCode: controllerResponse.statusCode,
+            statusMessage: controllerResponse.statusMessage,
+            showErrorMessages: controllerResponse.statusCode != 'Success' ? true : false,
+            edit: false,
+            showViewSingle: true
+        });
+    }
 });
 
 module.exports = router;

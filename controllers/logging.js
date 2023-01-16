@@ -106,7 +106,22 @@ const getErrorMessage = {
     1014: 'Calling topic controller: deleteTopic',
     1015: 'Rendering topic view: deleteTopic',
 
-    // 2000 - 2999 :
+    // 2000 - 2999 : user logging
+    2000: 'Add a user',
+    2001: 'View a user',
+    2002: 'Edit a user',
+    2003: 'Delete a user',
+    2004: 'View all users',
+    2005: 'View a user',
+    2006: 'Validate user data',
+    2007: 'Calling user controller: getUsers',
+    2008: 'Rendering user view: getUsers',
+    2009: 'Calling user controller: updateUser',
+    2010: 'Rendering user view: updateUser',
+    2011: 'Calling user controller: createUser',
+    2012: 'Rendering user view: createUser',
+    2013: 'Calling user controller: deleteUser',
+    2014: 'Rendering user view: deleteUser',
 
     // 3000 - 3999 :
 }
