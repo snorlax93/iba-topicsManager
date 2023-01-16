@@ -4,7 +4,7 @@ const axios = require('axios');
  * method: getDate
  * params: 
  * description: returns date time for database
- * returns: 2023-01-05 01:12:55.000
+ * returns: 2023-01-05
  */
 
 const getDate = async () => {
@@ -28,6 +28,12 @@ const getDateTime = async () => {
         .replace('T', ' ');
 };
 
+/**
+ * method: setToArray
+ * params: 
+ * description: returns object as a new array
+ */
+
 const setToArray = (object) => {
     let returnArray = [];
     for (let value of Object.values(object)) {
@@ -36,12 +42,18 @@ const setToArray = (object) => {
     return returnArray;
 }
 
+/**
+ * method: getIPAddress
+ * params: 
+ * description: returns string ip addres
+ */
+
 const getIPAddress = async (url) => {
     try {
         const response = await axios.get(url);
         return response.data.ip
     } catch (error) {
-        console.log('log err0r');
+        console.log('log error');
     }
 }
 

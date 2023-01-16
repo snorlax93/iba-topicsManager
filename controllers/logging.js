@@ -38,9 +38,9 @@ const logEvent = async (logString) => {
 
 
 /**
- * method: logEvent
+ * method: generateEvent
  * params: eventObj object : { eventName: string, eventType: string, eventSeverity: enum, eventCode: string, eventData: string, userDetails: { userId: int, userIpAddress: string, reqHost: string } }
- * description: to compile errors and events throughout the app
+ * description: generates the string for the log
  * returns: N/A
  */
 
@@ -49,10 +49,24 @@ const generateEvent = async (eventObj) => {
     await logEvent(logString);
 }
 
+/**
+ * method: setLoggingInfo
+ * params: multiple
+ * description: fields that can be consumed from app to log data 
+ * returns: N/A
+ */
+
 const setLoggingInfo = async (eventName, eventType, eventSeverity, eventCode, eventData, userDetails) => {
     const eventObj = {eventName, eventType, eventSeverity, eventCode, eventData, userDetails};
     await generateEvent(eventObj);
 }
+
+/**
+ * method: getSeverity
+ * enum: multiple
+ * description: customize the severities the app supports
+ * returns: N/A
+ */
 
 const getSeverity = {
     info: 'INFO',
@@ -60,6 +74,13 @@ const getSeverity = {
     trans: 'TRANSACTION',
     prrev: 'PR-REVIEW'
 }
+
+/**
+ * method: getErrorMessage
+ * enum: multiple
+ * description: customize the error codes and messages the app can support
+ * returns: N/A
+ */
 
 const getErrorMessage = {
     // 0 - 999 :General App
