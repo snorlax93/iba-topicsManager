@@ -5,7 +5,7 @@ on:
     branches: [ "develop", "master" ]
 
 jobs:
-  build:
+  PR_Review:
 
     runs-on: self-hosted
 

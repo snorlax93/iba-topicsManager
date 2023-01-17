@@ -4,12 +4,15 @@ block content
   h1= title
   //- debugging
   //- p title:  #{title ? true : false}
-  //- p data: #{data ? JSON.stringify(data) : false}
+  //- p data: #{data ? true : false}
   //- p edit: #{edit ? true : false}
   //- p editPost: #{editPost ? true : false}
   //- p showViewTable: #{showViewTable ? true : false}
   //- p showViewSingle: #{showViewSingle ? true : false}
   //- p showAddTable: #{showAddTable ? true : false}
+  //- p statusCode: #{statusCode ? statusCode : false}
+  //- p statusMessage: #{statusMessage ? statusMessage : false}
+  //- p showErrorMessage: #{showErrorMessage ? showErrorMessage : false}
   if showAddTable
     p
     .modal-dialog
@@ -24,10 +27,9 @@ block content
           // Modal Body
           .modal-body
             form(role='form' method='POST' action='/api/topicsmanager/users/add/')
-              if data
-                div.form-group
-                if data.errorMsg
-                  label(for='error') Error! : #{JSON.stringify(data.errorMsg)}
+              if statusMessage
+                script.
+                  alert('#{statusMessage}')
               div.form-group
                 label(for='userName') User Name:
                 input#name.form-control(type='text', placeholder='username' name='userName')
@@ -48,7 +50,7 @@ block content
             h4 footer
     // footer
     p.foot.text-xs-center(align='center') Topics Manager - 2023
-  else if edit
+  else if edit && data
     p
       .modal-dialog
           .modal-content
@@ -59,23 +61,23 @@ block content
             // Modal Body
             .modal-body
               form(role='form' method='POST' action='')
-                if data[1]
+                if showErrorMessages
                   div.form-group
-                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                    label(for='error') Status Message : #{statusMessage}
                 div.form-group
-                  label(for='topicName') User Name:
+                  label(for='userName') User Name:
                   input#name.form-control(type='text', value=data[0].userName name='userName')
                 div.form-group
-                  label(for='topicUrl') Password:
-                  input#name.form-control(type='text', value=data[0].password name='password')
+                  label(for='password') Password:
+                  input#name.form-control(type='password', value='******' name='password')
                 div.form-group
-                  label(for='createdBy') Email Address:
+                  label(for='emailAddress') Email Address:
                   input#name.form-control(type='text', value=data[0].emailAddress name='emailAddress')
                 div.form-group
-                  label(for='episode') Refresh Token:
+                  label(for='refreshToken') Refresh Token:
                   input#name.form-control(type='text', value=data[0].refreshToken name='refreshToken')
                 div.form-group
-                  label(for='episode') User Level:
+                  label(for='userLevel') User Level:
                   input#name.form-control(type='text', value=data[0].userLevel name='userLevel')
                 button.btn.btn-primary(type="submit", name="submit") Submit
                 button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/users/view/all/"')
@@ -85,7 +87,7 @@ block content
               h4 footer
       // footer
       p.foot.text-xs-cente(align='center') Topics Manager - 2023
-  else if editPost
+  else if editPost && data
     p
       .modal-dialog
           .modal-content
@@ -96,24 +98,24 @@ block content
             // Modal Body
             .modal-body
               form(role='form' method='POST' action='')
-                if data[1]
+                if showErrorMessages
                   div.form-group
-                    label(for='error') Status Message : #{JSON.stringify(data[1].statusMsg)}
+                    label(for='error') Status Message : #{statusMessage}
                 div.form-group
-                  label(for='topicName') User Name:
-                  input#name.form-control(type='text', value=data[0].userName name='userName')
+                  label(for='userName') User Name:
+                  input#name.form-control(type='text', value=data.userName name='userName')
                 div.form-group
-                  label(for='topicUrl') Password:
-                  input#name.form-control(type='text', value=data[0].password name='password')
+                  label(for='password') Password:
+                  input#name.form-control(type='password', value='******' name='password')
                 div.form-group
-                  label(for='createdBy') Email Address:
-                  input#name.form-control(type='text', value=data[0].emailAddress name='emailAddress')
+                  label(for='emailAddress') Email Address:
+                  input#name.form-control(type='text', value=data.emailAddress name='emailAddress')
                 div.form-group
-                  label(for='episode') Refresh Token:
-                  input#name.form-control(type='text', value=data[0].refreshToken name='refreshToken')
+                  label(for='refreshToken') Refresh Token:
+                  input#name.form-control(type='text', value=data.refreshToken name='refreshToken')
                 div.form-group
-                  label(for='episode') User Level:
-                  input#name.form-control(type='text', value=data[0].userLevel name='userLevel')
+                  label(for='userLevel') User Level:
+                  input#name.form-control(type='text', value=data.userLevel name='userLevel')
                 button.btn.btn-primary(type="submit", name="submit") Submit
                 button.btn.btn-default(type="button", data-dismiss="modal" onclick='window.location = "http://" + location.host + "/api/topicsmanager/users/view/all/"')
                   | Close
@@ -122,7 +124,7 @@ block content
               h4 footer
       // footer
       p.foot.text-xs-center(align='center') Topics Manager - 2023
-  else if showViewTable
+  else if showViewTable && data
     .table.table-hover.table-striped.table-sm.table-responsive
       table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
         tr
@@ -139,13 +141,13 @@ block content
             td(value=user.userId id='userId')
               a(href=`/api/topicsmanager/users/view/${user.userId}/`) #{user.userId}
             td(value=user.userName id='userName') #{user.userName}
-            td(value=user.password id='password') #{user.password}
+            td(value=user.password id='password') ******
             td(value=user.emailAddress id='emailAddress') #{user.emailAddress}
             td(value=user.refreshToken id='refreshToken') #{user.refreshToken}
             td(value=user.userLevel id='userLevel') #{user.userLevel}
             td(value=user.createdBy id='createdAt') #{user.createdAt}
             td(value=user.createdBy id='updatedAt') #{user.updatedAt}
-  else if showViewSingle
+  else if showViewSingle && data
     .table.table-hover.table-striped.table-sm.table-responsive
       table(style='margin-left:auto;margin-right:auto;width:90%;margin-top:25px;')
         tr
@@ -160,12 +162,12 @@ block content
           th(scope='col')
           th(scope='col')
         each user in data
-          - var deleteOnClick = 'window.location = "http://" + location.host + "/api/topicsmanager/users/delete/'+user.topicId+'/"';
+          - var deleteOnClick = 'window.location = "http://" + location.host + "/api/topicsmanager/users/delete/'+user.userId+'/"';
           tr 
             td(value=user.userId id='userId')
               a(href=`/api/topicsmanager/users/view/${user.userId}/`) #{user.userId}
             td(value=user.userName id='userName') #{user.userName}
-            td(value=user.password id='password') #{user.password}
+            td(value=user.password id='password') ******
             td(value=user.emailAddress id='emailAddress') #{user.emailAddress}
             td(value=user.refreshToken id='refreshToken') #{user.refreshToken}
             td(value=user.userLevel id='userLevel') #{user.userLevel}
@@ -177,4 +179,8 @@ block content
               button.btn.btn-outline-primary(type='button', onclick=deleteOnClick) Delete
         if showErrorMessages
           script.
-            alert('#{showErrorMessages}')
+            alert('#{statusMessage}')
+  else if !data
+    script.
+      alert('#{statusMessage}')
+    h2 NEED DATA!!

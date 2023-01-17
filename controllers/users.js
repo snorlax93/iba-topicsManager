@@ -1,143 +1,190 @@
-const mariadb = require('../utils/db');
+const databaseController = require('./database');
+const logger = require('../controllers/logging');
+const commonHelper = require('../helpers/common');
+
+/**
+ * method: createUser
+ * params: array: [userData]
+ * description: adds the user data to the database
+ * returns: { data: null, statusCode : string, statusMessage : string }
+ */
 
 const createUser = async (userData) => {
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+    let validateInputs = await validateUser(userData);
+
+    if (validateInputs.statusCode == 'Success') {
+        delete userData.reqBody.submit;
+        userData.reqBody['refreshToken'] = userData.reqBody.refreshToken ? userData.reqBody.refreshToken : 'fake-token';
+        userData.reqBody['userLevel'] = userData.reqBody.userLevel ? userData.reqBody.userLevel : '0';
+        userData.reqBody['createdAt'] = await commonHelper.getDateTime();
+        userData.reqBody['updatedAt'] = await commonHelper.getDateTime();
+
+        let query = {
+            'queryString': 'INSERT INTO users  value (?, ?, ?, ?, ?, ?, ?)',
+            'options': {
+                'tableName': 'users',
+                'method': 'INSERT INTO',
+                'value': 'value (?, ?, ?, ?, ?, ?, ?)',
+                'columns': '((userName, emailAddress, password, refreshToken, userLevel, createdAt, updatedAt)',
+                'queryData': commonHelper.setToArray(userData.reqBody),
+                'buildPattern': ['method', 'tableName', 'value']
+            }
+        };
+
+        await logger.setLoggingInfo('usersController', 4, 'info', '2017', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
+
+        returnData = await databaseController.queryDatabase(query);
+    } else {
+        returnData.data = null;
+        returnData.statusCode = validateInputs.statusCode;
+        returnData.statusMessage = validateInputs.statusMessage;
+    }
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2018', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
+    return returnData;
+}
+
+/**
+ * method: validateUser
+ * params: array: [userData]
+ * description: confirms if required fields are present and not null/empty strings
+ * returns: { statusCode : string, statusMessage : string }
+ */
+
+const validateUser = async (userData) => {
     let returnData = {
-        errorMsg: "Need to include Usesrname, Password and Email Address"
+        statusCode: 'Success',
+        statusMessage: null
     };
 
     if (userData) {
-        if (userData.userName !== null && userData.userName != "") {
-            if (userData.password !== null && userData.password != "") {
-                if (userData.emailAddress !== null && userData.emailAddress != "") {
-                    let dateTime = new Date()
-                        .toISOString()
-                        .slice(0, 19)
-                        .replace('T', ' ');
-
-                    const queryData = [
-                        userData.userId || null,
-                        userData.userName,
-                        userData.emailAddress,
-                        userData.password,
-                        userData.refreshToken || null,
-                        userData.userLevel || 0,
-                        dateTime,
-                        dateTime
-                    ]
-
-                    let conn;
-
-                    try {
-                        conn = await mariadb.pool.getConnection();
-                        const userNameExistRes = await conn.query("SELECT * FROM users WHERE userName = ?", userData.userName);
-                        const emailAddressExistRes = await conn.query("SELECT * FROM users WHERE emailAddress = ?", userData.emailAddress);
-
-                        if (userNameExistRes.length > 0) {
-                            returnData = { errorMsg: "username already exists. choose another" };
-                        } else if (emailAddressExistRes.length > 0) {
-                            returnData = { errorMsg: "emailAddress already exists. choose another" };
-                        } else {
-                            await conn.query("INSERT INTO users value (?, ?, ?, ?, ?, ?, ?, ?)", queryData);
-                        }
-                    } catch (err) {
-                        throw err;
-                    } finally {
-                        if (conn) await conn.end();
-                        returnData = queryData;
-                    };
-                } else {
-                    returnData = {
-                        errorMsg: "no email address entered"
-                    }
-                }
-            } else {
-                returnData = {
-                    errorMsg: "no password entered"
-                };
-            }
-
-        } else {
+        if (userData.reqBody.userName == null || userData.reqBody.userName == '') {
             returnData = {
-                errorMsg: "no userName entered"
+                data: null,
+                statusCode: 'Error',
+                statusMessage: 'Need to enter a User Name'
+            };
+        } else if (userData.reqBody.password == null || userData.reqBody.password == '') {
+            returnData = {
+                data: null,
+                statusCode: 'Error',
+                statusMessage: 'Need to enter a Password'
+            };
+        } else if ((userData.reqBody.userName == null || userData.reqBody.userName == '') && (userData.reqBody.password == null || userData.reqBody.password == '')) {
+            returnData = {
+                statusCode: 'Error',
+                statusMessage: 'Need to include User Name and Password'
             };
         }
     }
 
+    await logger.setLoggingInfo('usersController', 4, 'info', '2019', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
     return returnData;
 }
 
+/**
+ * method: getUsers
+ * params: object: {completed: boolean, userId: int}
+ * description: get all users based on flag (completed)
+ * returns: { statusCode : string, statusMessage : string }
+ */
+
 const getUsers = async (flags) => {
-    let users = [];
-    let query = "SELECT * FROM users";
-    
-    // make db call with query made above
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query);
-        for (let i = 0; i <= res.length - 1; i++) {
-            users.push(res[i]);
+    let queryString;
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+
+    if (flags) {
+        if (flags.userId) { queryString = 'WHERE userId = \'' + flags.userId + '\''; }
+    }
+
+    let query = {
+        'options': {
+            'queryString': queryString,
+            'tableName': 'users',
+            'method': 'SELECT * FROM',
+            'queryData': null,
+            'buildPattern': ['method', 'tableName', queryString ? 'queryString' : null]
         }
-    } catch (err) {
-        throw err;
-    } finally {
-        if (conn) await conn.end();
     };
 
-    // return users array
-    return users;
+    await logger.setLoggingInfo('usersController', 4, 'info', '2020', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
+
+    returnData = await databaseController.queryDatabase(query);
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2021', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
+
+    return returnData;
 };
 
-const getUser = async (userId) => {
-    let user = [];
-    let query = "SELECT * FROM users WHERE userId = ?";
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query, userId);
-        user.push(res[0]);
-    } catch (err) {
-        throw err;
-    } finally {
-        if (conn) await conn.end();
+/**
+ * method: updateUser
+ * params: object: {userId: int, reqBody: obj}
+ * description: updates the user based on userId
+ * returns: { data: obj, statusCode : string, statusMessage : string }
+ */
+
+const updateUser = async (userData) => {
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+    let validateInputs = await validateUser(userData);
+
+    if (validateInputs.statusCode == 'Success') {
+        userData.reqBody['updatedAt'] = await commonHelper.getDateTime();
+        userData.reqBody['userId'] = userData.userId;
+        let query = {
+            'options': {
+                'queryString': 'UPDATE users SET userName=?, emailAddress=?, password=?, refreshToken=?, userLevel=?, updatedAt=? WHERE userId=?',
+                'tableName': 'users',
+                'queryData': commonHelper.setToArray(userData.reqBody),
+                'buildPattern': ['queryString']
+            }
+        };
+
+        await logger.setLoggingInfo('usersController', 4, 'info', '2022', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
+
+        returnData = await databaseController.queryDatabase(query);
+    } else {
+        returnData.data = null;
+        returnData.statusCode = validateInputs.statusCode;
+        returnData.statusMessage = validateInputs.statusMessage;
+    }
+
+    await logger.setLoggingInfo('usersController', 4, 'info', '2023', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
+
+    return returnData;
+};
+
+/**
+ * method: deleteUser
+ * params: object: {userId: int}
+ * description: deletes the user based on userId
+ * returns: { data: obj, statusCode : string, statusMessage : string }
+ */
+
+const deleteUser = async (userData) => {
+    let returnData = { data: null, statusCode: null, statusMessage: null };
+
+    let query = {
+        'options': {
+            'queryString': 'DELETE FROM users WHERE userId=?',
+            'tableName': 'users',
+            'queryData': [userData.userId],
+            'buildPattern': ['queryString']
+        }
     };
 
-    return user;
-};
+    await logger.setLoggingInfo('usersController', 4, 'info', '2024', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
-const updateUser = async (userId, reqBody) => {
-    let user = [];
-    let query = "UPDATE users SET userName=?, emailAddress=?, password=?, refreshToken=?, userLevel=?, updatedAt=? WHERE userId=?";
-    let dateTime = new Date()
-                        .toISOString()
-                        .slice(0, 19)
-                        .replace('T', ' ');
+    returnData = await databaseController.queryDatabase(query);
 
-    const queryData = [
-        reqBody.userName || null ,
-        reqBody.emailAddress || null ,
-        reqBody.password || null ,
-        reqBody.refreshToken || null,
-        reqBody.userLevel || 0,
-        dateTime
-    ]
+    await logger.setLoggingInfo('usersController', 4, 'info', '2025', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
-    queryData.push(userId);
-    try {
-        conn = await mariadb.pool.getConnection();
-        const res = await conn.query(query, queryData);
-        res.affectedRows > 0 ? user = true : user = false;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    } finally {
-        if (conn) await conn.end();
-    };
-
-    return user;
-};
+    return returnData;
+}
 
 module.exports = {
     createUser,
     getUsers,
-    getUser,
-    updateUser
+    updateUser,
+    deleteUser
 };
