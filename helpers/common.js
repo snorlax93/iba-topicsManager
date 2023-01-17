@@ -52,6 +52,7 @@ const getIPAddress = async (url) => {
     try {
         const response = await axios.get(url);
         return response.data.ip
+        // return '111.222.333.444';
     } catch (error) {
         console.log('log error');
     }

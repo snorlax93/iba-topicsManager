@@ -38,7 +38,7 @@ const logEvent = async (logString) => {
 
 const generateEvent = async (eventObj) => {
     let dateTime = await commonHelper.getDateTime();
-    const logString = `LOG: [${dateTime}] - ${getSeverity[eventObj.eventSeverity]} | ${eventObj.eventName} - ${getEventType[eventObj.eventType]} occurred: ${getEventCode[eventObj.eventCode]} | controllerMessage: ${JSON.stringify(eventObj.eventData)}. userDetails { user: ${eventObj.userDetails.userId}, IP: ${eventObj.userDetails.userIpAddress}, host: ${eventObj.userDetails.reqHost} }`;
+    const logString = `LOG: [${dateTime}] - ${getSeverity[eventObj.eventSeverity]} | ${eventObj.eventName} - ${getEventType[eventObj.eventType]} occurred: ${getEventCode[eventObj.eventCode]} | controllerMessage: ${eventObj.eventData}. userDetails { user: ${eventObj.userDetails.userId}, IP: ${eventObj.userDetails.userIpAddress}, host: ${eventObj.userDetails.reqHost} }`;
     await logEvent(logString);
 }
 

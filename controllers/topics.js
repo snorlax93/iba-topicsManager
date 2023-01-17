@@ -1,6 +1,6 @@
-const topicsController = require('./database');
-const commonHelper = require('../helpers/common');
+const databaseController = require('./database');
 const logger = require('../controllers/logging');
+const commonHelper = require('../helpers/common');
 
 /**
  * method: createTopic
@@ -11,7 +11,7 @@ const logger = require('../controllers/logging');
 
 const createTopic = async (topicData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
-    let validateInputs = validateTopic(topicData);
+    let validateInputs = await validateTopic(topicData);
 
     if (validateInputs.statusCode == 'Success') {
         topicData.reqBody.completed = topicData.reqBody.completed ? 'TRUE' : 'FALSE';
@@ -21,15 +21,18 @@ const createTopic = async (topicData) => {
         topicData.reqBody['updatedAt'] = await commonHelper.getDateTime();
 
         let query = {
-            'queryString': 'INSERT INTO topics (topicName, topicUrl, createdBy, plannedEpisode, completed, createdAt, updatedAt) value (?, ?, ?, ?, ?, ?, ?)',
             'options': {
                 'tableName': 'topics',
-                'queryData': commonHelper.setToArray(topicData.reqBody)
+                'method': 'INSERT INTO',
+                'value': 'value (?, ?, ?, ?, ?, ?, ?)',
+                'columns': '(topicName, topicUrl, createdBy, plannedEpisode, completed, createdAt, updatedAt) ',
+                'queryData': commonHelper.setToArray(topicData.reqBody),
+                'buildPattern': ['method', 'tableName', 'value']
             }
         };
 
         await logger.setLoggingInfo('topicsController', 4, 'info', '1018', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
-        returnData = await topicsController.queryDatabase(query);
+        returnData = await databaseController.queryDatabase(query);
     } else {
         returnData.data = null;
         returnData.statusCode = validateInputs.statusCode;
@@ -50,7 +53,7 @@ const createTopic = async (topicData) => {
 const validateTopic = async (topicData) => {
     let returnData = {
         statusCode: 'Success',
-        statusMessage: null
+        statusMessage: 'Successful validation'
     };
 
     if (topicData) {
@@ -86,26 +89,28 @@ const validateTopic = async (topicData) => {
  */
 
 const getTopics = async (flags) => {
-    let queryString = 'SELECT * FROM topics WHERE completed = \'FALSE\'';;
+    let queryString = 'WHERE completed = \'FALSE\'';;
     let returnData = { data: null, statusCode: null, statusMessage: null };
 
     if (flags) {
-        if (flags.completed) {queryString = 'SELECT * FROM topics WHERE (completed = \'TRUE\' OR completed = \'FALSE\')';}
-        if (flags.singleTopic) {queryString = 'SELECT * FROM topics WHERE (completed = \'TRUE\' OR completed = \'FALSE\')';}
-        if (flags.topicId) {queryString += ' AND topicId = \''+flags.topicId+'\'';}
+        if (flags.completed) {queryString = 'WHERE (completed = \'TRUE\' OR completed = \'FALSE\') ';}
+        if (flags.singleTopic) {queryString = 'WHERE (completed = \'TRUE\' OR completed = \'FALSE\') ';}
+        if (flags.topicId) {queryString += 'AND topicId = \''+flags.topicId+'\'';}
     }
 
     let query = {
-        'queryString': queryString,
         'options': {
             'tableName': 'topics',
-            'queryData': null
+            'method': 'SELECT * FROM',
+            'value': queryString,
+            'queryData': null,
+            'buildPattern': ['method', 'tableName','value']
         }
     };
 
     await logger.setLoggingInfo('topicsController', 4, 'info', '1021', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
-    returnData = await topicsController.queryDatabase(query);
+    returnData = await databaseController.queryDatabase(query);
 
     await logger.setLoggingInfo('topicsController', 4, 'info', '1022', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
@@ -121,26 +126,28 @@ const getTopics = async (flags) => {
 
 const updateTopic = async (topicData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
-    let validateInputs = validateTopic(topicData);
+    let validateInputs = await validateTopic(topicData);
 
     if (validateInputs.statusCode == 'Success') {
         topicData.reqBody['topicId'] = topicData.topicId;
         let query = {
-            'queryString': 'UPDATE topics SET topicName=?, topicUrl=?, createdBy=?, plannedEpisode=?, completed=? WHERE topicId=?',
             'options': {
                 'tableName': 'topics',
-                'queryData': commonHelper.setToArray(topicData.reqBody)
+                'method': "UPDATE",
+                'value': 'SET topicName=?, topicUrl=?, createdBy=?, plannedEpisode=?, completed=? WHERE topicId=?',
+                'queryData': commonHelper.setToArray(topicData.reqBody),
+                'buildPattern': ['method', 'tableName','value']
             }
         };
         await logger.setLoggingInfo('topicsController', 4, 'info', '1023', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
-        returnData = await topicsController.queryDatabase(query);
+        returnData = await databaseController.queryDatabase(query);
     } else {
         returnData.data = null;
         returnData.statusCode = validateInputs.statusCode;
         returnData.statusMessage = validateInputs.statusMessage;
     }    
 
-    await logger.setLoggingInfo('topicsController', 4, 'info', '1024', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1024', JSON.stringify(returnData), {'userId': null, 'userIpAddress': null, 'reqHost': null});
     return returnData;
 };
 
@@ -155,17 +162,21 @@ const deleteTopic = async (topicData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
 
     let query = {
-        'queryString': 'DELETE FROM topics WHERE topicId=?',
+        'queryString': '',
         'options': {
-            'tableName': 'topics',
-            'queryData': [topicData.topicId]
+            'tableName': 'topics ',
+            'method': 'DELETE FROM ',
+            'value': 'topics WHERE topicId=?',
+            'queryData': topicData.topicId,
+            'buildPattern': ['method', 'value']
         }
     };
-    await logger.setLoggingInfo('topicsController', 4, 'info', '1025', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1025', JSON.stringify(returnData), {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
-    returnData = await topicsController.queryDatabase(query);
+    returnData = await databaseController.queryDatabase(query);
 
-    await logger.setLoggingInfo('topicsController', 4, 'info', '1026', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('topicsController', 4, 'info', '1026', JSON.stringify(returnData), {'userId': null, 'userIpAddress': null, 'reqHost': null});
 
     return returnData;
 }

@@ -11,10 +11,9 @@ const commonHelper = require('../helpers/common');
 
 const createUser = async (userData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
-    let validateInputs = validateUser(userData);
+    let validateInputs = await validateUser(userData);
 
     if (validateInputs.statusCode == 'Success') {
-
         delete userData.reqBody.submit;
         userData.reqBody['refreshToken'] = userData.reqBody.refreshToken ? userData.reqBody.refreshToken : 'fake-token';
         userData.reqBody['userLevel'] = userData.reqBody.userLevel ? userData.reqBody.userLevel : '0';
@@ -22,14 +21,18 @@ const createUser = async (userData) => {
         userData.reqBody['updatedAt'] = await commonHelper.getDateTime();
 
         let query = {
-            'queryString': 'INSERT INTO users (userName, emailAddress, password, refreshToken, userLevel, createdAt, updatedAt) value (?, ?, ?, ?, ?, ?, ?)',
+            'queryString': 'INSERT INTO users  value (?, ?, ?, ?, ?, ?, ?)',
             'options': {
                 'tableName': 'users',
-                'queryData': commonHelper.setToArray(userData.reqBody)
+                'method': 'INSERT INTO',
+                'value': 'value (?, ?, ?, ?, ?, ?, ?)',
+                'columns': '((userName, emailAddress, password, refreshToken, userLevel, createdAt, updatedAt)',
+                'queryData': commonHelper.setToArray(userData.reqBody),
+                'buildPattern': ['method', 'tableName', 'value']
             }
         };
 
-        await logger.setLoggingInfo('usersController', 4, 'info', '2017', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+        await logger.setLoggingInfo('usersController', 4, 'info', '2017', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
         returnData = await databaseController.queryDatabase(query);
     } else {
@@ -38,7 +41,7 @@ const createUser = async (userData) => {
         returnData.statusMessage = validateInputs.statusMessage;
     }
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2018', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2018', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
     return returnData;
 }
 
@@ -76,7 +79,7 @@ const validateUser = async (userData) => {
         }
     }
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2019', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2019', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
     return returnData;
 }
 
@@ -88,26 +91,28 @@ const validateUser = async (userData) => {
  */
 
 const getUsers = async (flags) => {
-    let queryString = 'SELECT * FROM users';
+    let queryString;
     let returnData = { data: null, statusCode: null, statusMessage: null };
 
     if (flags) {
-        if (flags.userId) {queryString += ' WHERE userId = \''+flags.userId+'\'';}
+        if (flags.userId) { queryString = 'WHERE userId = \'' + flags.userId + '\''; }
     }
 
     let query = {
-        'queryString': queryString,
         'options': {
+            'queryString': queryString,
             'tableName': 'users',
-            'queryData': null
+            'method': 'SELECT * FROM',
+            'queryData': null,
+            'buildPattern': ['method', 'tableName', queryString ? 'queryString' : null]
         }
     };
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2020', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2020', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
     returnData = await databaseController.queryDatabase(query);
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2021', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2021', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
     return returnData;
 };
@@ -121,29 +126,30 @@ const getUsers = async (flags) => {
 
 const updateUser = async (userData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
-    let validateInputs = validateUser(userData);
+    let validateInputs = await validateUser(userData);
 
     if (validateInputs.statusCode == 'Success') {
         userData.reqBody['updatedAt'] = await commonHelper.getDateTime();
         userData.reqBody['userId'] = userData.userId;
         let query = {
-            'queryString': 'UPDATE users SET userName=?, emailAddress=?, password=?, refreshToken=?, userLevel=?, updatedAt=? WHERE userId=?',
             'options': {
+                'queryString': 'UPDATE users SET userName=?, emailAddress=?, password=?, refreshToken=?, userLevel=?, updatedAt=? WHERE userId=?',
                 'tableName': 'users',
-                'queryData': commonHelper.setToArray(userData.reqBody)
+                'queryData': commonHelper.setToArray(userData.reqBody),
+                'buildPattern': ['queryString']
             }
         };
-        
-        await logger.setLoggingInfo('usersController', 4, 'info', '2022', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+
+        await logger.setLoggingInfo('usersController', 4, 'info', '2022', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
         returnData = await databaseController.queryDatabase(query);
     } else {
         returnData.data = null;
         returnData.statusCode = validateInputs.statusCode;
         returnData.statusMessage = validateInputs.statusMessage;
-    }    
+    }
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2023', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2023', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
     return returnData;
 };
@@ -159,18 +165,19 @@ const deleteUser = async (userData) => {
     let returnData = { data: null, statusCode: null, statusMessage: null };
 
     let query = {
-        'queryString': 'DELETE FROM users WHERE userId=?',
         'options': {
+            'queryString': 'DELETE FROM users WHERE userId=?',
             'tableName': 'users',
-            'queryData': [userData.userId]
+            'queryData': [userData.userId],
+            'buildPattern': ['queryString']
         }
     };
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2024', query, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2024', query, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
     returnData = await databaseController.queryDatabase(query);
 
-    await logger.setLoggingInfo('usersController', 4, 'info', '2025', returnData, {'userId': null, 'userIpAddress': null, 'reqHost': null});
+    await logger.setLoggingInfo('usersController', 4, 'info', '2025', returnData, { 'userId': null, 'userIpAddress': null, 'reqHost': null });
 
     return returnData;
 }
