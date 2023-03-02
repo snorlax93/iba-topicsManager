@@ -152,7 +152,11 @@ const getEventCode = {
     4000: 'State before transaction',
     4001: 'State after transaction',
     4002: 'State after transaction (return)',
-    4003: 'State after transaction (database connection closed)'
+    4003: 'State after transaction (database connection closed)',
+
+    // 5000 - 5999 : database
+    5000: 'Sign in GET page',
+    5001: 'Sign in POST page'
 }
 
 
